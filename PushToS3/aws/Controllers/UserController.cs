@@ -51,8 +51,7 @@ namespace aws.Controllers
                 return Ok();
             }
             catch(Exception ex)
-            {
-                return OK();
+            {                
                 throw;
             }
         }

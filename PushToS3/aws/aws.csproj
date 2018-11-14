@@ -5,12 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Amazon\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.Extensions.NETCORE.setup" Version="3.3.6" />
-    <PackageReference Include="AWSSDK.S3" Version="3.3.26.9" />
+    <PackageReference Include="AWSSDK.S3" Version="3.3.26.10" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.5" />
     <PackageReference Include="MongoDB.Driver" Version="2.7.1" />

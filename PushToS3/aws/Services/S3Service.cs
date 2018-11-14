@@ -9,16 +9,19 @@ using aws.Models;
 using System.Net;
 using Amazon.S3.Transfer;
 using System.IO;
-
+using Amazon;
+using MongoDB;
+using MongoDB.Driver;
+using aws.Models;
 namespace aws.Services
 {
     public class S3Service : IS3Service
     {
         private readonly IAmazonS3 _client;
 
-        public S3Service (IAmazonS3 client)
-        {
-            _client = client; 
+        public S3Service ()
+        {            
+            
         }
 
         public async Task<S3Response> CreateBucketAsync(string bucketName)
@@ -72,39 +75,78 @@ namespace aws.Services
         private const string AdvancedUpload = "AdvancedUpload";
 
 
-        public async Task UploadFileAsync(string bucketName)
+        public async Task UploadFileAsync(string bucketName, string filebase64)
         {
             try
             {
-                var fileTransferUtility = new TransferUtility(_client);
+                var credentials = new Amazon.Runtime.BasicAWSCredentials("AKIAJYYC5JKJ6B5ANFUQ", "sA6Y5pzFn+5XXmkzmCs43n30ujWCejqhNXNqvJob");
+
+                var S3Client = new AmazonS3Client(credentials, RegionEndpoint.USEast2);
+
+                var fileTransferUtility = new TransferUtility(S3Client);
+                var guid = Guid.NewGuid().ToString("N").Substring(0, 4);
+                try
+                {
+                    byte[] bytes = Convert.FromBase64String(filebase64);
+
+                    using (S3Client)
+                    {
+                        var request = new PutObjectRequest
+                        {
+                            BucketName = bucketName,
+                            CannedACL = S3CannedACL.PublicRead,
+                            Key = string.Format("bucketName/{0}", guid + ".jpg")
+                        };
+                        using (var ms = new MemoryStream(bytes))
+                        {
+                            request.InputStream = ms;
+                          await  S3Client.PutObjectAsync(request);
+                        }
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("AWS Fail");
+                }
+                GetPreSignedUrlRequest request1 = new GetPreSignedUrlRequest();
+                request1.BucketName = bucketName;
+                request1.Key = string.Format("bucketName/{0}", guid + ".jpg");
+                request1.Expires = DateTime.Now.AddHours(1);
+                request1.Protocol = Protocol.HTTP;
+                string url = S3Client.GetPreSignedURL(request1);
+
+
+                Console.WriteLine(url);
 
                 //Option1
-                await fileTransferUtility.UploadAsync(FilePath, bucketName);
+                //  await fileTransferUtility.UploadAsync(FilePath, bucketName);
 
                 //option2
-                await fileTransferUtility.UploadAsync(FilePath, bucketName, UploadWithKeyName);
+                //  await fileTransferUtility.UploadAsync(FilePath, bucketName, UploadWithKeyName);
 
                 //option 3
-                using (var fileToupload = new FileStream(FilePath, FileMode.Open, FileAccess.Read))
-                {
-                    await fileTransferUtility.UploadAsync(fileToupload, bucketName, FileStreamUpload);
-                }
+                //using (var fileToupload = new FileStream(FilePath, FileMode.Open, FileAccess.Read))
+                //{
+                //    await fileTransferUtility.UploadAsync(fileToupload, bucketName, FileStreamUpload);
+                //}
 
                 //Option 4
-                var fileTransferUtilityRequest = new TransferUtilityUploadRequest
-                {
-                    BucketName = bucketName,
-                    FilePath = FilePath,
-                    StorageClass = S3StorageClass.Standard,
-                    PartSize = 6291456, //6MB
-                    Key= AdvancedUpload,
-                    CannedACL = S3CannedACL.NoACL
-                };
+                // var fileTransferUtilityRequest = new TransferUtilityUploadRequest
+                // {
+                //   BucketName = bucketName,
+                //   FilePath = FilePath,
+                //    StorageClass = S3StorageClass.Standard,
+                //   PartSize = 6291456, //6MB
+                //    Key= AdvancedUpload,
+                //    CannedACL = S3CannedACL.NoACL
+                //  };
 
-                fileTransferUtilityRequest.Metadata.Add("param1", "value1");
-                fileTransferUtilityRequest.Metadata.Add("param2", "value2");
+                // fileTransferUtilityRequest.Metadata.Add("param1", "value1");
+                // fileTransferUtilityRequest.Metadata.Add("param2", "value2");
 
-                await fileTransferUtility.UploadAsync(fileTransferUtilityRequest);
+
+                // await fileTransferUtility.UploadAsync(fileTransferUtilityRequest);
             }
             catch (AmazonS3Exception ex)
             {
@@ -117,24 +159,27 @@ namespace aws.Services
         }
 
 
-        public async Task GetObjectFromS3Async(string bucketName)
+        public async Task GetObjectFromS3Async(string bucketName, string KeyName)
         {
-            const string KeyName = "ss";
+            //KeyName = "ss";
             try
             {
-                var request = new GetObjectRequest
+                var credentials = new Amazon.Runtime.BasicAWSCredentials("AKIAJYYC5JKJ6B5ANFUQ", "sA6Y5pzFn+5XXmkzmCs43n30ujWCejqhNXNqvJob");
+
+                var S3Client = new AmazonS3Client(credentials, RegionEndpoint.USEast2);
+                GetObjectRequest request = new GetObjectRequest
                 {
                     BucketName = bucketName,
                     Key = KeyName
                 };
                 string responseBody;
 
-                using (var response = await _client.GetObjectAsync(request))
-                using (var responseStream = response.ResponseStream)
-                using (var reader = new StreamReader(responseStream))
+                using (GetObjectResponse response = await S3Client.GetObjectAsync(request))
+                using (Stream responseStream = response.ResponseStream)
+                using (StreamReader reader = new StreamReader(responseStream))
                 {
-                    var title = response.Metadata["x-amz-meta-title"];
-                    var contentType = response.Metadata["Content-Type"];
+                    string title = response.Metadata["x-amz-meta-title"];
+                    string contentType = response.Metadata["Content-Type"];
 
                     Console.WriteLine($"Object meta, Title : {title}");
                     Console.WriteLine($"Content type: {contentType}");

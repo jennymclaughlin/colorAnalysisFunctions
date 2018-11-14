@@ -10,8 +10,8 @@ namespace aws.Services
     {
         Task<S3Response> CreateBucketAsync(string bucketName);
 
-        Task UploadFileAsync(string bucketName);
+        Task UploadFileAsync(string bucketName, string base64file);
 
-        Task GetObjectFromS3Async(string bucketName);
+        Task GetObjectFromS3Async(string bucketName, string KeyName);
     }
 }

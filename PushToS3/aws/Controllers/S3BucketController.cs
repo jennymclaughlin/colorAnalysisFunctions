@@ -27,10 +27,11 @@ namespace aws.Controllers
 
 
         [HttpPost]
-        [Route("AddFile/{bucketName}")]
-        public async Task<IActionResult> AddFile([FromRoute] string bucketName)
+        [Route("AddFile")]
+        public async Task<IActionResult> AddFile([FromBody] string filebase64)
         {
-            await _service.UploadFileAsync(bucketName);
+                string bucketName = "coloranalysisusers";
+            await _service.UploadFileAsync(bucketName, filebase64);
 
             return Ok();
         }
@@ -39,7 +40,7 @@ namespace aws.Controllers
         [Route("GetFile/{bucketName}")]
         public async Task<IActionResult> GetObjectFromS3Async([FromRoute] string bucketName)
         {
-            await _service.GetObjectFromS3Async(bucketName);
+          //  await _service.GetObjectFromS3Async(bucketName);
             return Ok();
         }
 
