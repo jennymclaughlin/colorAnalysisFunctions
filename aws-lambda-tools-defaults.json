@@ -14,5 +14,5 @@
     "template"      : "serverless.template",
     "template-parameters" : "\"ShouldCreateBucket\"=\"true\";\"BucketName\"=\"\"",
     "s3-bucket"           : "coloranalysisusers",
-    "stack-name"          : "awsColorAnalysistest"
+    "stack-name"          : "awsColorAnalysis"
 }
