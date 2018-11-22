@@ -70,21 +70,6 @@ namespace awsColorAnalysisFunctions.Controllers
             return Ok();
         }
 
-    }
-
-    public class allUsers {
-        public IEnumerable<users> users { get; set; }
-    }
-
-    public class users
-    {
-        public string userId { get; set; }
-        public string userName { get; set; }
-        public string userFirstName { get; set; }
-        public string userLastName { get; set; }
-        public string userEmail { get; set; }
-        public string userPassword { get; set; }
-        public string userImageUrl { get; set; }
-    }
-
+    }  
+ 
 }

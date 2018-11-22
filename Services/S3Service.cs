@@ -35,7 +35,7 @@ namespace awsColorAnalysisFunctions.Services
                         {
                             BucketName = bucketName,
                             CannedACL = S3CannedACL.PublicRead,
-                            Key = string.Format("bucketName/{0}", guid + ".jpg")
+                            Key = string.Format("userImages/{0}", guid + ".jpg")
                         };
                         using (var ms = new MemoryStream(bytes))
                         {
@@ -44,7 +44,7 @@ namespace awsColorAnalysisFunctions.Services
                         }
                         GetPreSignedUrlRequest request1 = new GetPreSignedUrlRequest();
                         request1.BucketName = bucketName;
-                        request1.Key = string.Format("bucketName/{0}", guid + ".jpg");
+                        request1.Key = string.Format("userImages/{0}", guid + ".jpg");
                         request1.Expires = DateTime.Now.AddHours(1);
                         request1.Protocol = Protocol.HTTP;
                         string url = S3Client.GetPreSignedURL(request1);
