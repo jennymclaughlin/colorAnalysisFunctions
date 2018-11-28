@@ -24,8 +24,8 @@ namespace awsColorAnalysisFunctions.Controllers
             _service = service;
         }
 
-        [HttpGet("login")]
-        public async Task<userResponse> Get([FromQuery]string userName, [FromQuery] string userPassword)
+        [HttpPost("login")]
+        public async Task<userResponse> Get([FromBody]loginRequest request)
         {
             userResponse userResponse = new userResponse();
             var credentials = new Amazon.Runtime.BasicAWSCredentials("AKIAJYYC5JKJ6B5ANFUQ", "sA6Y5pzFn+5XXmkzmCs43n30ujWCejqhNXNqvJob");
@@ -35,8 +35,8 @@ namespace awsColorAnalysisFunctions.Controllers
             if (tableResponse.TableNames.Contains(tableName))
             {
                 var conditions = new List<ScanCondition>();
-                conditions.Add(new ScanCondition("userName", ScanOperator.Equal, userName));
-                conditions.Add(new ScanCondition("userPassword", ScanOperator.Equal, userPassword));
+                conditions.Add(new ScanCondition("userName", ScanOperator.Equal, request.username));
+                conditions.Add(new ScanCondition("userPassword", ScanOperator.Equal, request.userpassword));
                 var allDocs = await _context.ScanAsync<users>(conditions).GetRemainingAsync();
                 user _user = new user();
                 _user.userEmail = allDocs[0].userEmail;
@@ -50,6 +50,27 @@ namespace awsColorAnalysisFunctions.Controllers
                 userResponse.code = (int)System.Net.HttpStatusCode.OK;
                 userResponse.message = "Success";
                 // Create our table if it doesn't exist
+
+                //var credentials = new Amazon.Runtime.BasicAWSCredentials("AKIAJYYC5JKJ6B5ANFUQ", "sA6Y5pzFn+5XXmkzmCs43n30ujWCejqhNXNqvJob");
+                //var S3Client = new AmazonDynamoDBClient(credentials, RegionEndpoint.USEast2);
+                //var tableName = "users";
+                DynamoDBContext context = new DynamoDBContext(S3Client);
+                var tableResponse1 = await S3Client.ListTablesAsync();
+                if (tableResponse1.TableNames.Contains(tableName))
+                {
+                    var conditions1 = new List<ScanCondition>();
+                    conditions.Add(new ScanCondition("userId", ScanOperator.Equal, allDocs[0].userId));
+                    var allDocs1 = await context.ScanAsync<users>(conditions1).GetRemainingAsync();
+                    users _user1 = new users();
+                    _user1.userEmail = allDocs1[0].userEmail;
+                    _user1.userImageUrl = request.imageUrl;
+                    _user1.userFirstName = allDocs1[0].userFirstName;
+                    _user1.userId = allDocs1[0].userId;
+                    _user1.userLastName = allDocs1[0].userLastName;
+                    _user1.userName = allDocs1[0].userName;
+                    _user1.userPassword = allDocs1[0].userPassword;
+                    await context.SaveAsync<users>(_user1);
+                }
             }
 
             return userResponse;
@@ -135,28 +156,6 @@ namespace awsColorAnalysisFunctions.Controllers
         {
             string bucketName = "coloranalysisusers";
             var response = await _service.UploadFileAsync(bucketName, request.filebase64);
-           
-            var credentials = new Amazon.Runtime.BasicAWSCredentials("AKIAJYYC5JKJ6B5ANFUQ", "sA6Y5pzFn+5XXmkzmCs43n30ujWCejqhNXNqvJob");
-            var S3Client = new AmazonDynamoDBClient(credentials, RegionEndpoint.USEast2);
-            var tableName = "users";
-            DynamoDBContext context = new DynamoDBContext(S3Client);
-            var tableResponse = await S3Client.ListTablesAsync();
-            if (tableResponse.TableNames.Contains(tableName))
-            {
-                var conditions = new List<ScanCondition>();
-                conditions.Add(new ScanCondition("userId", ScanOperator.Equal, request.userId));
-                var allDocs = await context.ScanAsync<users>(conditions).GetRemainingAsync();
-                users _user = new users();
-                _user.userEmail = allDocs[0].userEmail;
-                _user.userImageUrl = response.url;
-                _user.userFirstName = allDocs[0].userFirstName;
-                _user.userId = allDocs[0].userId;
-                _user.userLastName = allDocs[0].userLastName;
-                _user.userName = allDocs[0].userName;
-                _user.userPassword = allDocs[0].userPassword;
-                await context.SaveAsync<users>(_user);
-            }
-
             return Ok(response);
         }
     }
@@ -164,7 +163,7 @@ namespace awsColorAnalysisFunctions.Controllers
     public class S3UploadRequest
     {
         public string filebase64 { get; set; }
-        public string userId { get; set; }
+        //public string userId { get; set; }
     }
 
     public class users
@@ -196,6 +195,13 @@ namespace awsColorAnalysisFunctions.Controllers
         public string message { get; set; }
         public int code { get; set; }
         public user user { get; set; }
+    }
+
+    public class loginRequest
+    {
+        public string username { get; set; }
+        public string userpassword { get; set; }
+        public string imageUrl { get; set; }
     }
 
     public class userRequest
