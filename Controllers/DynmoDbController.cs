@@ -18,6 +18,9 @@ namespace awsColorAnalysisFunctions.Controllers
     public class DynmoDbController : ControllerBase
     {
         DynamoDBContext context;
+        private static RegionEndpoint regionEndpoint = RegionEndpoint.USEast2;
+        private static string access_key = "AKIAJYYC5JKJ6B5ANFUQ";
+        private static string secret_key = "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";
         public DynmoDbController(IAmazonDynamoDB context)
         {
             this.context = new DynamoDBContext(context);
@@ -27,9 +30,9 @@ namespace awsColorAnalysisFunctions.Controllers
         public async Task<users> Get([FromQuery]string userName, [FromQuery] string userPassword)
         {
             users userResponse = new users();
-            var credentials = new Amazon.Runtime.BasicAWSCredentials("AKIAJYYC5JKJ6B5ANFUQ", "sA6Y5pzFn+5XXmkzmCs43n30ujWCejqhNXNqvJob");
+            var credentials = new Amazon.Runtime.BasicAWSCredentials(access_key, secret_key);
             var tableName = "users";
-            var S3Client = new AmazonDynamoDBClient(credentials, RegionEndpoint.USEast2);
+            var S3Client = new AmazonDynamoDBClient(credentials, regionEndpoint);
             var tableResponse = await S3Client.ListTablesAsync();
             if (tableResponse.TableNames.Contains(tableName))
             {
@@ -47,8 +50,8 @@ namespace awsColorAnalysisFunctions.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody]users _user)
         {
-            var credentials = new Amazon.Runtime.BasicAWSCredentials("AKIAJYYC5JKJ6B5ANFUQ", "sA6Y5pzFn+5XXmkzmCs43n30ujWCejqhNXNqvJob");
-            var S3Client = new AmazonDynamoDBClient(credentials, RegionEndpoint.USEast2);
+            var credentials = new Amazon.Runtime.BasicAWSCredentials(access_key, secret_key);
+            var S3Client = new AmazonDynamoDBClient(credentials, regionEndpoint);
             var tableName = "users";
             DynamoDBContext context = new DynamoDBContext(S3Client);
             var tableResponse = await S3Client.ListTablesAsync();

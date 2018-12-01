@@ -17,6 +17,10 @@ namespace awsColorAnalysisFunctions.Controllers
     public class S3BucketController : Controller
     {
         private readonly IS3Service _service;
+        private static RegionEndpoint regionEndpoint = RegionEndpoint.USEast2;
+        private static string bucket_name = "coloranalysisusers";
+        private static string access_key="AKIAJYYC5JKJ6B5ANFUQ";
+        private static string secret_key="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";
         DynamoDBContext _context;
         public S3BucketController(IS3Service service, IAmazonDynamoDB context)
         {
@@ -28,9 +32,9 @@ namespace awsColorAnalysisFunctions.Controllers
         public async Task<userResponse> Get([FromBody]loginRequest request)
         {
             userResponse userResponse = new userResponse();
-            var credentials = new Amazon.Runtime.BasicAWSCredentials("AKIAJYYC5JKJ6B5ANFUQ", "sA6Y5pzFn+5XXmkzmCs43n30ujWCejqhNXNqvJob");
+            var credentials = new Amazon.Runtime.BasicAWSCredentials(access_key, secret_key);
             var tableName = "users";
-            var S3Client = new AmazonDynamoDBClient(credentials, RegionEndpoint.USEast2);
+            var S3Client = new AmazonDynamoDBClient(credentials, regionEndpoint);
             var tableResponse = await S3Client.ListTablesAsync();
             if (tableResponse.TableNames.Contains(tableName))
             {
@@ -81,8 +85,8 @@ namespace awsColorAnalysisFunctions.Controllers
         {
             try
             {
-                var credentials = new Amazon.Runtime.BasicAWSCredentials("AKIAJYYC5JKJ6B5ANFUQ", "sA6Y5pzFn+5XXmkzmCs43n30ujWCejqhNXNqvJob");
-                var S3Client = new AmazonDynamoDBClient(credentials, RegionEndpoint.USEast2);
+                var credentials = new Amazon.Runtime.BasicAWSCredentials(access_key, secret_key);
+                var S3Client = new AmazonDynamoDBClient(credentials, regionEndpoint);
                 var tableName = "users";
                 Table userTable = Table.LoadTable(S3Client, tableName);
                 var _user = new Document();
@@ -118,8 +122,8 @@ namespace awsColorAnalysisFunctions.Controllers
             userResponse resUser = new userResponse();
             try
             {
-                var credentials = new Amazon.Runtime.BasicAWSCredentials("AKIAJYYC5JKJ6B5ANFUQ", "sA6Y5pzFn+5XXmkzmCs43n30ujWCejqhNXNqvJob");
-                var S3Client = new AmazonDynamoDBClient(credentials, RegionEndpoint.USEast2);
+                var credentials = new Amazon.Runtime.BasicAWSCredentials(access_key, secret_key);
+                var S3Client = new AmazonDynamoDBClient(credentials, regionEndpoint);
                 var tableName = "users";
                 DynamoDBContext context = new DynamoDBContext(S3Client);
                 var tableResponse = await S3Client.ListTablesAsync();
@@ -154,8 +158,7 @@ namespace awsColorAnalysisFunctions.Controllers
         [HttpPost]        
         public async Task<IActionResult> Post([FromBody] S3UploadRequest request)
         {
-            string bucketName = "coloranalysisusers";
-            var response = await _service.UploadFileAsync(bucketName, request.filebase64);
+            var response = await _service.UploadFileAsync(bucket_name, request.filebase64);
             return Ok(response);
         }
     }
