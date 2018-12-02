@@ -15,8 +15,8 @@ namespace awsColorAnalysisFunctions.Services
 {
     public class S3Service : IS3Service
     {
-        private static string access_key = "AKIAJYYC5JKJ6B5ANFUQ";
-        private static string secret_key = "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";
+        private static string access_key = "";
+        private static string secret_key = "";
         public async Task<S3UploadResponse> UploadFileAsync(string bucketName, string filebase64)
         {
             try

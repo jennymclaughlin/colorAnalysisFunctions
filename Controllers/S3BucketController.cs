@@ -19,8 +19,8 @@ namespace awsColorAnalysisFunctions.Controllers
         private readonly IS3Service _service;
         private static RegionEndpoint regionEndpoint = RegionEndpoint.USEast2;
         private static string bucket_name = "coloranalysisusers";
-        private static string access_key="AKIAJYYC5JKJ6B5ANFUQ";
-        private static string secret_key="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";
+        private static string access_key= "";
+        private static string secret_key= "";
         DynamoDBContext _context;
         public S3BucketController(IS3Service service, IAmazonDynamoDB context)
         {

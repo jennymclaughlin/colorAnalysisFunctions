@@ -19,8 +19,8 @@ namespace awsColorAnalysisFunctions.Controllers
     {
         DynamoDBContext context;
         private static RegionEndpoint regionEndpoint = RegionEndpoint.USEast2;
-        private static string access_key = "AKIAJYYC5JKJ6B5ANFUQ";
-        private static string secret_key = "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";
+        private static string access_key = "";
+        private static string secret_key = "";
         public DynmoDbController(IAmazonDynamoDB context)
         {
             this.context = new DynamoDBContext(context);
