@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Amazon.S3;
 using Amazon.S3.Util;
 using Amazon.S3.Model;
-using awsColorAnalysisFunctions.Models;
 using System.Net;
 using Amazon.S3.Transfer;
 using System.IO;
@@ -15,18 +14,16 @@ namespace awsColorAnalysisFunctions.Services
 {
     public class S3Service : IS3Service
     {
-        private static string access_key = "";
-        private static string secret_key = "";
         public async Task<S3UploadResponse> UploadFileAsync(string bucketName, string filebase64)
         {
             try
             {
-                var credentials = new Amazon.Runtime.BasicAWSCredentials(access_key, secret_key);
+                var credentials = new Amazon.Runtime.BasicAWSCredentials(Constants.access_key, Constants.secret_key);
 
-                var S3Client = new AmazonS3Client(credentials, RegionEndpoint.USEast2);
+                var S3Client = new AmazonS3Client(credentials, Constants.regionEndpoint);
 
                 var fileTransferUtility = new TransferUtility(S3Client);
-                var guid = Guid.NewGuid().ToString("N").Substring(0, 4);
+                var guid = Guid.NewGuid().ToString("N").Substring(0, 6);
                 try
                 {
                     byte[] bytes = Convert.FromBase64String(filebase64);
@@ -47,7 +44,7 @@ namespace awsColorAnalysisFunctions.Services
                         GetPreSignedUrlRequest request1 = new GetPreSignedUrlRequest();
                         request1.BucketName = bucketName;
                         request1.Key = string.Format("userImages/{0}", guid + ".jpg");
-                        request1.Expires = DateTime.Now.AddHours(1);
+                        request1.Expires = DateTime.Now.AddHours(2);
                         request1.Protocol = Protocol.HTTP;
                         string url = S3Client.GetPreSignedURL(request1);
 

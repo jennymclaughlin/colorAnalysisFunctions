@@ -8,8 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
-using Amazon.DynamoDBv2.Model;
-using Amazon;
+using awsColorAnalysisFunctions.Services;
 
 namespace awsColorAnalysisFunctions.Controllers
 {
@@ -18,9 +17,6 @@ namespace awsColorAnalysisFunctions.Controllers
     public class DynmoDbController : ControllerBase
     {
         DynamoDBContext context;
-        private static RegionEndpoint regionEndpoint = RegionEndpoint.USEast2;
-        private static string access_key = "";
-        private static string secret_key = "";
         public DynmoDbController(IAmazonDynamoDB context)
         {
             this.context = new DynamoDBContext(context);
@@ -30,17 +26,17 @@ namespace awsColorAnalysisFunctions.Controllers
         public async Task<users> Get([FromQuery]string userName, [FromQuery] string userPassword)
         {
             users userResponse = new users();
-            var credentials = new Amazon.Runtime.BasicAWSCredentials(access_key, secret_key);
+            var credentials = new Amazon.Runtime.BasicAWSCredentials(Constants.access_key, Constants.secret_key);
             var tableName = "users";
-            var S3Client = new AmazonDynamoDBClient(credentials, regionEndpoint);
+            var S3Client = new AmazonDynamoDBClient(credentials, Constants.regionEndpoint);
             var tableResponse = await S3Client.ListTablesAsync();
-            if (tableResponse.TableNames.Contains(tableName))
+            if (tableResponse.TableNames.Contains(tableName)) 
             {
                 var conditions = new List<ScanCondition>();
                 conditions.Add(new ScanCondition("userName", ScanOperator.Equal, userName));
                 conditions.Add(new ScanCondition("userPassword", ScanOperator.Equal, userPassword));
                 var allDocs = await context.ScanAsync<users>(conditions).GetRemainingAsync();
-                userResponse = allDocs[0];
+                userResponse = allDocs[0]; 
                 // Create our table if it doesn't exist
             }
 
@@ -50,8 +46,8 @@ namespace awsColorAnalysisFunctions.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody]users _user)
         {
-            var credentials = new Amazon.Runtime.BasicAWSCredentials(access_key, secret_key);
-            var S3Client = new AmazonDynamoDBClient(credentials, regionEndpoint);
+            var credentials = new Amazon.Runtime.BasicAWSCredentials(Constants.access_key, Constants.secret_key);
+            var S3Client = new AmazonDynamoDBClient(credentials, Constants.regionEndpoint);
             var tableName = "users";
             DynamoDBContext context = new DynamoDBContext(S3Client);
             var tableResponse = await S3Client.ListTablesAsync();
